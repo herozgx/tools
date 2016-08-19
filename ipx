@@ -1,0 +1,63 @@
+#!/bin/env python
+
+import sys
+import re
+
+class IPX():
+    def __init__(self, value):
+        ip_pattern = re.compile("^((25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})\.){3}(25[0-5]|2[0-4][0-9]|1?[0-9]{1,2})$")
+        number_pattern = re.compile("^[0-9]+$")
+        if ip_pattern.match(value):
+            self.ip = value
+            self.ip2int()
+            self.value_type="ip"
+        elif number_pattern.match(value):
+            if int(value) > 4294967295:
+                print "Value Error: value is out of ipv4 range."
+                sys.exit(1)
+            self.number = int(value)
+            self.int2ip()
+            self.value_type="number"
+        else:
+            print "Value Error: value is neither an ip or a number."
+            sys.exit(1)
+
+    def int2ip(self):
+        segs = list()
+        number = self.number
+        for i in range(4):
+            segs.append(str(number%256))
+            number /= 256
+        self.ip = ".".join(segs[::-1])
+
+    def ip2int(self):
+        segs = self.ip.split('.')
+        self.number = (int(segs[0])<<24)+(int(segs[1])<<16)+(int(segs[2])<<8)+int(segs[3])
+
+    def show(self):
+        if self.value_type == "number":
+            self.showIp()
+        elif self.value_type == "ip":
+            self.showInt()
+        else:
+            print "Never get here"
+
+    def getInt(self):
+        return self.number
+
+    def getIp(self):
+        return self.ip
+
+    def showInt(self):
+        print self.number
+
+    def showIp(self):
+        print self.ip
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print "Syntax Error: ip2int need an argumnet"
+        sys.exit(1)
+    IP = IPX(sys.argv[1])
+    IP.show()
